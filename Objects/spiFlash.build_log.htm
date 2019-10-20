@@ -1,0 +1,81 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: μVision V5.28.0.0
+Copyright (C) 2019 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: 是的 Yaoxing Wu, 都是, LIC=DSNNN-YARWD-IL0CB-24APT-WTZ5V-BT31F
+ 
+Tool Versions:
+Toolchain:       MDK-ARM Professional  Version: 5.28.0.0
+Toolchain Path:  C:\Keil_v5\ARM\ARMCC\Bin
+C Compiler:      Armcc.exe V5.06 update 6 (build 750)
+Assembler:       Armasm.exe V5.06 update 6 (build 750)
+Linker/Locator:  ArmLink.exe V5.06 update 6 (build 750)
+Library Manager: ArmAr.exe V5.06 update 6 (build 750)
+Hex Converter:   FromElf.exe V5.06 update 6 (build 750)
+CPU DLL:         SARMCM3.DLL V5.28.0.0
+Dialog DLL:      DCM.DLL V1.17.3.0
+Target DLL:      CMSIS_AGDI.dll V1.31.18.0
+Dialog DLL:      TCM.DLL V1.36.2.0
+ 
+<h2>Project:</h2>
+C:\Users\Administrator\Desktop\FatFs文件系统\spiFlash.uvprojx
+Project File Date:  10/20/2019
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+Build target 'spiFLASH'
+compiling diskio.c...
+FatFs\diskio.c(87): warning:  #223-D: function "ATA_disk_read" declared implicitly
+  		result = ATA_disk_read(buff, sector, count);
+FatFs\diskio.c(93): error:  #20: identifier "MMC" is undefined
+  	case MMC :
+FatFs\diskio.c(96): warning:  #223-D: function "MMC_disk_read" declared implicitly
+  		result = MMC_disk_read(buff, sector, count);
+FatFs\diskio.c(102): error:  #20: identifier "USB" is undefined
+  	case USB :
+FatFs\diskio.c(105): warning:  #223-D: function "USB_disk_read" declared implicitly
+  		result = USB_disk_read(buff, sector, count);
+FatFs\diskio.c(81): warning:  #550-D: variable "result"  was set but never used
+  	int result;
+FatFs\diskio.c(136): warning:  #223-D: function "ATA_disk_write" declared implicitly
+  		result = ATA_disk_write(buff, sector, count);
+FatFs\diskio.c(142): error:  #20: identifier "MMC" is undefined
+  	case MMC :
+FatFs\diskio.c(145): warning:  #223-D: function "MMC_disk_write" declared implicitly
+  		result = MMC_disk_write(buff, sector, count);
+FatFs\diskio.c(151): error:  #20: identifier "USB" is undefined
+  	case USB :
+FatFs\diskio.c(154): warning:  #223-D: function "USB_disk_write" declared implicitly
+  		result = USB_disk_write(buff, sector, count);
+FatFs\diskio.c(130): warning:  #550-D: variable "result"  was set but never used
+  	int result;
+FatFs\diskio.c(187): error:  #20: identifier "MMC" is undefined
+  	case MMC :
+FatFs\diskio.c(193): error:  #20: identifier "USB" is undefined
+  	case USB :
+FatFs\diskio.c(178): warning:  #177-D: variable "result"  was declared but never referenced
+  	int result;
+FatFs\diskio.c: 9 warnings, 6 errors
+compiling spi.c...
+".\Objects\spiFlash.axf" - 6 Error(s), 9 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: Keil
+                http://www.keil.com/pack/Keil.STM32F4xx_DFP.2.11.0.pack
+                Keil.STM32F4xx_DFP.2.11.0
+                STMicroelectronics STM32F4 Series Device Support, Drivers and Examples
+
+<h2>Collection of Component include folders:</h2>
+  .\RTE\_spiFLASH
+  C:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.11.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include
+
+<h2>Collection of Component Files used:</h2>
+Target not created.
+Build Time Elapsed:  00:00:01
+</pre>
+</body>
+</html>
