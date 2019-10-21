@@ -4,6 +4,7 @@
 #include "uart.h"
 #include "delay.h"
 #include "spi.h"
-
+#include "ff.h"
+#include "diskio.h"
 
 #endif /**/

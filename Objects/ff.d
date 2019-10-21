@@ -47,3 +47,4 @@
 .\objects\ff.o: .\Users\app.h
 .\objects\ff.o: .\Common\delay.h
 .\objects\ff.o: .\Drivers\spi.h
+.\objects\ff.o: .\FatFs\diskio.h

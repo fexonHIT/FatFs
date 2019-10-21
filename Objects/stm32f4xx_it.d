@@ -44,3 +44,7 @@
 .\objects\stm32f4xx_it.o: .\Users\app.h
 .\objects\stm32f4xx_it.o: .\Common\delay.h
 .\objects\stm32f4xx_it.o: .\Drivers\spi.h
+.\objects\stm32f4xx_it.o: .\FatFs\ff.h
+.\objects\stm32f4xx_it.o: .\FatFs\integer.h
+.\objects\stm32f4xx_it.o: .\FatFs\ffconf.h
+.\objects\stm32f4xx_it.o: .\FatFs\diskio.h

@@ -44,3 +44,7 @@
 .\objects\uart.o: .\Common\delay.h
 .\objects\uart.o: .\Users\app.h
 .\objects\uart.o: .\Drivers\spi.h
+.\objects\uart.o: .\FatFs\ff.h
+.\objects\uart.o: .\FatFs\integer.h
+.\objects\uart.o: .\FatFs\ffconf.h
+.\objects\uart.o: .\FatFs\diskio.h
