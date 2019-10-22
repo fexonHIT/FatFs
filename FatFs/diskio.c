@@ -11,7 +11,7 @@
 //#include "usbdisk.h"	/* Example: Header file of existing USB MSD control module */
 //#include "atadrive.h"	/* Example: Header file of existing ATA harddisk control module */
 //#include "sdcard.h"		/* Example: Header file of existing MMC/SDC contorl module */
-
+#include  "app.h"
 /* Definitions of physical drive number for each drive */
   #define ATA		0	/* Example: Map ATA harddisk to physical drive 0 */
 //#define MMC		1	/* Example: Map MMC/SD card to physical drive 1 */
@@ -27,17 +27,27 @@ DSTATUS disk_status (
 	BYTE pdrv		/* Physical drive nmuber to identify the drive */
 )
 {
-	int result;
+	DSTATUS status =STA_NOINIT;
+    uint8_t res=0;
 	switch (pdrv) {
     case ATA:	/* SD CARD */
 	break;
 	case SPI_FLASH :
-		 result = w25q128TestConnection();   /*如果是1表示测试通过*/
-		// translate the reslut code here
-         if(result) return 0;                /*成功检测到硬盘*/       
-         else return STA_NODISK;             /*没有检测到硬盘*/
+		res = w25q128TestConnection();   /*如果是1表示测试通过*/
+		 if(res){
+            /*设备ID读取正确*/
+            status &=~STA_NOINIT;
+         }
+         else{
+            /*设备ID读取错误*/
+             status=STA_NOINIT;
+         }
+         break;
+     default:
+            status=STA_NOINIT;
+          
 	}
-	     return STA_NOINIT;
+	     return status;
 }
 
 
@@ -50,17 +60,24 @@ DSTATUS disk_initialize (
 	BYTE pdrv				/* Physical drive nmuber to identify the drive */
 )
 {
-	DSTATUS stat;
-	int result;
+	DSTATUS status=STA_NOINIT;
+	int i=500;
 	switch (pdrv) {
     case ATA :
-		return stat;
+		return status;
 	case SPI_FLASH :
-		result = spi5Init(); /*对SPIFLASH进行初始化*/
-        stat=disk_status(SPI_FLASH);
-		return stat;
+		spi5Init(); /*对SPIFLASH进行初始化*/
+        while(i--);     /*延时一小段时间*/
+    /*对SPI FLASH进行唤醒*/
+       spiFlashWakeup();
+    /*获取芯片的状态*/
+       status=disk_status(SPI_FLASH);
+       break;
+    default:
+        status=STA_NOINIT;
+
 	}
-	return STA_NOINIT;
+	return status;
 }
 
 
@@ -76,11 +93,11 @@ DRESULT disk_read (
 	UINT count		/* Number of sectors to read */
 )
 {
-	DRESULT res;
 	switch (pdrv) {
 	case ATA :
-	 return res;
+	 break;
 	case SPI_FLASH :
+     sector +=1536;
      w25q128ReadData(buff,sector<<12,count<<12);
      return RES_OK;                         /*返回成功读取的标志*/
 	}
@@ -133,21 +150,25 @@ DRESULT disk_ioctl (
 	DRESULT res;
 	switch (pdrv) {
 	case ATA :
-		return res;
+		break;
     case SPI_FLASH:
         switch(cmd){
             case GET_SECTOR_COUNT:
-                *(DWORD*)buff= 4096-1536;      /*一共4096个扇区,不操作前面的6MB字节，也就是1536个扇区*/
+                *(DWORD*)buff= 2560;      /*一共4096个扇区,不操作前面的6MB字节，也就是1536个扇区*/
             break;
             case GET_SECTOR_SIZE:
-                *(DWORD*)buff=4096;
+                *(WORD*)buff=4096;
+                 break;
             case GET_BLOCK_SIZE:
                 *(DWORD*)buff=1;                /*一次操作读写多少个扇区，这里设置一次操作读写1个扇区*/
-            break;
+                 break;
         }
-        return RES_OK;
+        res=RES_OK;
+        break;
+        default :
+        res=RES_PARERR;      
 	}
-	return RES_PARERR;
+	return res;
 }
 #endif
 __weak DWORD get_fattime(void) {

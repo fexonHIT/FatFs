@@ -7,7 +7,7 @@ Description:对串行FLASH的SPI外设选端进行初始化
 uint8_t  spi5Init(void){
 		{ 
 			  /*对SPI外设的时钟进行使能*/
-				RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI5,ENABLE);
+			 RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI5,ENABLE);
 		    /*使能GPIO引脚的时钟*/
 			  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF,ENABLE);
 		}
@@ -25,7 +25,7 @@ uint8_t  spi5Init(void){
 		  gpio.GPIO_Pin=GPIO_Pin_6;
 		  GPIO_Init(GPIOF,&gpio);
 		  /*配置引脚的复用功能*/
-	    GPIO_PinAFConfig(GPIOF,GPIO_PinSource7,GPIO_AF_SPI5);
+	      GPIO_PinAFConfig(GPIOF,GPIO_PinSource7,GPIO_AF_SPI5);
 		  GPIO_PinAFConfig(GPIOF,GPIO_PinSource8,GPIO_AF_SPI5);
 		  GPIO_PinAFConfig(GPIOF,GPIO_PinSource9,GPIO_AF_SPI5);
       /*配置SPI5 工作在模式3*/
@@ -121,8 +121,8 @@ uint8_t w25q128TestConnection(void){
            }
            else{
               FLASH_INFO("%s","cannot attach to W25Q128,try check you cable connection!\r\n");
-              return 0;
            }
+           return 0;
 }
 /*
 Author:HIT_XiaoWu
@@ -151,7 +151,7 @@ void  w25q128WaitForWrtieEnd(void){
       do{
             flashStatus=spiSendByte(FLASH_SPI,DUMMY_BYTE);
             if(spiTimeOut--==0) {spiTimeOutUserCallBack(4); return;}
-      }while(flashStatus&WIP_Flag);     /**/
+      }while((flashStatus&WIP_Flag)==SET);     /**/
       /*停止通信*/
       SPI_FLASH_STOP();
 }
@@ -163,6 +163,8 @@ Description：FLASH扇区擦除指令
 void w25q128EraseSector(uint32_t addr){
     /*发送写使能指令*/
     w25q128WriteEnable();
+    /*等待擦除完毕*/
+    w25q128WaitForWrtieEnd();
     /*等待内部忙碌结束*/
     //w25q128WaitForWrtieEnd();
        /*开始通信*/
@@ -258,152 +260,152 @@ Author:HIT_XiaoWu
 Date:2019/10/19
 Description:W25Q128不定量数据的写入
 */
-//void w25q128WriteBuffer(uint8_t *buf,uint32_t addr,uint16_t len){
-//     uint8_t numOfPage =0,numOfSingle=0,Addr=0,count=0,temp=0;
-//     Addr=addr%W25Q128_PAGE_SIZE;
-//     /*计算出差出多少个字节可以对齐到页地址*/
-//     count=W25Q128_PAGE_SIZE-Addr;
-//     /*计算要写多少个整数页*/
-//     numOfPage=len/W25Q128_PAGE_SIZE;
-//     /*计算出所有的不满一个页的字节数*/
-//     numOfSingle=len%W25Q128_PAGE_SIZE;
-//     if(Addr==0){
-//        /*不满一页*/
-//       if(numOfPage==0){
-//          w25q128WritePage(buf,addr,len);
-//       }
-//       else
-//       {
-//           /*先把整数页写满*/
-//           while(numOfPage--){
-//           w25q128WritePage(buf,addr,W25Q128_PAGE_SIZE);
-//              buf+=W25Q128_PAGE_SIZE;
-//              addr+=W25Q128_PAGE_SIZE;
-//           }
-//           /*剩下的不满一页的数据包，直接将其写完*/
-//           w25q128WritePage(buf,addr,numOfSingle);
-//       }
-//     }
-//      else{
-//      /*若地址不对齐*/
-//          if(numOfPage==0){
-//            if(numOfSingle>count){
-//               /*先写完当前页*/
-//              w25q128WritePage(buf,addr,count);
-//              temp=numOfSingle-count;buf +=count;addr +=count;
-//              /*再写剩余的数据*/
-//              w25q128WritePage(buf,addr,temp);
-//            }
-//            else w25q128WritePage(buf,addr,count);
-//          }
-//          else{
-//              /*如果有多页，现将当前页写完*/
-//              w25q128WritePage(buf,addr,count);
-//              len -=count;
-//              numOfPage=len/W25Q128_PAGE_SIZE;
-//              numOfSingle=len%W25Q128_PAGE_SIZE;
-//              /*处理当前页*/
-//              w25q128WritePage(buf,addr,count);
-//              buf +=count;
-//              addr +=count;
-//              /*写整数页*/
-//              while(numOfPage--){
-//                w25q128WritePage(buf,addr,W25Q128_PAGE_SIZE);
-//                buf  += W25Q128_PAGE_SIZE;
-//                addr += W25Q128_PAGE_SIZE;
-//              }
-//              /*处理最后剩余的字节*/
-//              if(numOfSingle) w25q128WritePage(buf,addr,numOfSingle);    
-//          }
-//      }
-//}
-#define SPI_FLASH_PageSize 256
-void w25q128WriteBuffer(u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite)
-{
-  u8 NumOfPage = 0, NumOfSingle = 0, Addr = 0, count = 0, temp = 0;
-	
-	/*mod运算求余，若writeAddr是SPI_FLASH_PageSize整数倍，运算结果Addr值为0*/
-  Addr = WriteAddr % SPI_FLASH_PageSize;
-	
-	/*差count个数据值，刚好可以对齐到页地址*/
-  count = SPI_FLASH_PageSize - Addr;	
-	/*计算出要写多少整数页*/
-  NumOfPage =  NumByteToWrite / SPI_FLASH_PageSize;
-	/*mod运算求余，计算出剩余不满一页的字节数*/
-  NumOfSingle = NumByteToWrite % SPI_FLASH_PageSize;
-
-	 /* Addr=0,则WriteAddr 刚好按页对齐 aligned  */
-  if (Addr == 0) 
-  {
-		/* NumByteToWrite < SPI_FLASH_PageSize */
-    if (NumOfPage == 0) 
-    {
-      w25q128WritePage(pBuffer, WriteAddr, NumByteToWrite);
-    }
-    else /* NumByteToWrite > SPI_FLASH_PageSize */
-    {
-			/*先把整数页都写了*/
-      while (NumOfPage--)
-      {
-        w25q128WritePage(pBuffer, WriteAddr, SPI_FLASH_PageSize);
-        WriteAddr +=  SPI_FLASH_PageSize;
-        pBuffer += SPI_FLASH_PageSize;
+void w25q128WriteBuffer(uint8_t *buf,uint32_t addr,uint16_t len){
+     uint8_t numOfPage =0,numOfSingle=0,Addr=0,count=0,temp=0;
+     Addr=addr%W25Q128_PAGE_SIZE;
+     /*计算出差出多少个字节可以对齐到页地址*/
+     count=W25Q128_PAGE_SIZE-Addr;
+     /*计算要写多少个整数页*/
+     numOfPage=len/W25Q128_PAGE_SIZE;
+     /*计算出所有的不满一个页的字节数*/
+     numOfSingle=len%W25Q128_PAGE_SIZE;
+     if(Addr==0){
+        /*不满一页*/
+       if(numOfPage==0){
+          w25q128WritePage(buf,addr,len);
+       }
+       else
+       {
+           /*先把整数页写满*/
+           while(numOfPage--){
+           w25q128WritePage(buf,addr,W25Q128_PAGE_SIZE);
+              buf+=W25Q128_PAGE_SIZE;
+              addr+=W25Q128_PAGE_SIZE;
+           }
+           /*剩下的不满一页的数据包，直接将其写完*/
+           w25q128WritePage(buf,addr,numOfSingle);
+       }
+     }
+      else{
+      /*若地址不对齐*/
+          if(numOfPage==0){
+            if(numOfSingle>count){
+               /*先写完当前页*/
+              w25q128WritePage(buf,addr,count);
+              temp=numOfSingle-count;buf +=count;addr +=count;
+              /*再写剩余的数据*/
+              w25q128WritePage(buf,addr,temp);
+            }
+            else w25q128WritePage(buf,addr,count);
+          }
+          else{
+              /*如果有多页，现将当前页写完*/
+              w25q128WritePage(buf,addr,count);
+              len -=count;
+              numOfPage=len/W25Q128_PAGE_SIZE;
+              numOfSingle=len%W25Q128_PAGE_SIZE;
+              /*处理当前页*/
+              w25q128WritePage(buf,addr,count);
+              buf +=count;
+              addr +=count;
+              /*写整数页*/
+              while(numOfPage--){
+                w25q128WritePage(buf,addr,W25Q128_PAGE_SIZE);
+                buf  += W25Q128_PAGE_SIZE;
+                addr += W25Q128_PAGE_SIZE;
+              }
+              /*处理最后剩余的字节*/
+              if(numOfSingle) w25q128WritePage(buf,addr,numOfSingle);    
+          }
       }
-			
-			/*若有多余的不满一页的数据，把它写完*/
-      w25q128WritePage(pBuffer, WriteAddr, NumOfSingle);
-    }
-  }
-	/* 若地址与 SPI_FLASH_PageSize 不对齐  */
-  else 
-  {
-		/* NumByteToWrite < SPI_FLASH_PageSize */
-    if (NumOfPage == 0) 
-    {
-			/*当前页剩余的count个位置比NumOfSingle小，写不完*/
-      if (NumOfSingle > count) 
-      {
-        temp = NumOfSingle - count;
-				
-				/*先写满当前页*/
-        w25q128WritePage(pBuffer, WriteAddr, count);
-        WriteAddr +=  count;
-        pBuffer += count;
-				
-				/*再写剩余的数据*/
-        w25q128WritePage(pBuffer, WriteAddr, temp);
-      }
-      else /*当前页剩余的count个位置能写完NumOfSingle个数据*/
-      {				
-        w25q128WritePage(pBuffer, WriteAddr, NumByteToWrite);
-      }
-    }
-    else /* NumByteToWrite > SPI_FLASH_PageSize */
-    {
-			/*地址不对齐多出的count分开处理，不加入这个运算*/
-      NumByteToWrite -= count;
-      NumOfPage =  NumByteToWrite / SPI_FLASH_PageSize;
-      NumOfSingle = NumByteToWrite % SPI_FLASH_PageSize;
-
-      w25q128WritePage(pBuffer, WriteAddr, count);
-      WriteAddr +=  count;
-      pBuffer += count;
-			
-			/*把整数页都写了*/
-      while (NumOfPage--)
-      {
-        w25q128WritePage(pBuffer, WriteAddr, SPI_FLASH_PageSize);
-        WriteAddr +=  SPI_FLASH_PageSize;
-        pBuffer += SPI_FLASH_PageSize;
-      }
-			/*若有多余的不满一页的数据，把它写完*/
-      if (NumOfSingle != 0)
-      {
-        w25q128WritePage(pBuffer, WriteAddr, NumOfSingle);
-      }
-    }
-  }
 }
+//#define SPI_FLASH_PageSize 256
+//void w25q128WriteBuffer(u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite)
+//{
+//  u8 NumOfPage = 0, NumOfSingle = 0, Addr = 0, count = 0, temp = 0;
+//	
+//	/*mod运算求余，若writeAddr是SPI_FLASH_PageSize整数倍，运算结果Addr值为0*/
+//  Addr = WriteAddr % SPI_FLASH_PageSize;
+//	
+//	/*差count个数据值，刚好可以对齐到页地址*/
+//  count = SPI_FLASH_PageSize - Addr;	
+//	/*计算出要写多少整数页*/
+//  NumOfPage =  NumByteToWrite / SPI_FLASH_PageSize;
+//	/*mod运算求余，计算出剩余不满一页的字节数*/
+//  NumOfSingle = NumByteToWrite % SPI_FLASH_PageSize;
+
+//	 /* Addr=0,则WriteAddr 刚好按页对齐 aligned  */
+//  if (Addr == 0) 
+//  {
+//		/* NumByteToWrite < SPI_FLASH_PageSize */
+//    if (NumOfPage == 0) 
+//    {
+//      w25q128WritePage(pBuffer, WriteAddr, NumByteToWrite);
+//    }
+//    else /* NumByteToWrite > SPI_FLASH_PageSize */
+//    {
+//			/*先把整数页都写了*/
+//      while (NumOfPage--)
+//      {
+//        w25q128WritePage(pBuffer, WriteAddr, SPI_FLASH_PageSize);
+//        WriteAddr +=  SPI_FLASH_PageSize;
+//        pBuffer += SPI_FLASH_PageSize;
+//      }
+//			
+//			/*若有多余的不满一页的数据，把它写完*/
+//      w25q128WritePage(pBuffer, WriteAddr, NumOfSingle);
+//    }
+//  }
+//	/* 若地址与 SPI_FLASH_PageSize 不对齐  */
+//  else 
+//  {
+//		/* NumByteToWrite < SPI_FLASH_PageSize */
+//    if (NumOfPage == 0) 
+//    {
+//			/*当前页剩余的count个位置比NumOfSingle小，写不完*/
+//      if (NumOfSingle > count) 
+//      {
+//        temp = NumOfSingle - count;
+//				
+//				/*先写满当前页*/
+//        w25q128WritePage(pBuffer, WriteAddr, count);
+//        WriteAddr +=  count;
+//        pBuffer += count;
+//				
+//				/*再写剩余的数据*/
+//        w25q128WritePage(pBuffer, WriteAddr, temp);
+//      }
+//      else /*当前页剩余的count个位置能写完NumOfSingle个数据*/
+//      {				
+//        w25q128WritePage(pBuffer, WriteAddr, NumByteToWrite);
+//      }
+//    }
+//    else /* NumByteToWrite > SPI_FLASH_PageSize */
+//    {
+//			/*地址不对齐多出的count分开处理，不加入这个运算*/
+//      NumByteToWrite -= count;
+//      NumOfPage =  NumByteToWrite / SPI_FLASH_PageSize;
+//      NumOfSingle = NumByteToWrite % SPI_FLASH_PageSize;
+
+//      w25q128WritePage(pBuffer, WriteAddr, count);
+//      WriteAddr +=  count;
+//      pBuffer += count;
+//			
+//			/*把整数页都写了*/
+//      while (NumOfPage--)
+//      {
+//        w25q128WritePage(pBuffer, WriteAddr, SPI_FLASH_PageSize);
+//        WriteAddr +=  SPI_FLASH_PageSize;
+//        pBuffer += SPI_FLASH_PageSize;
+//      }
+//			/*若有多余的不满一页的数据，把它写完*/
+//      if (NumOfSingle != 0)
+//      {
+//        w25q128WritePage(pBuffer, WriteAddr, NumOfSingle);
+//      }
+//    }
+//  }
+//}
 /*
 Author:HIT_XiaoWu
 Date:2019/10/19

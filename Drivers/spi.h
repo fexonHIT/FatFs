@@ -48,7 +48,7 @@ uint32_t w25q128GetDevciceId(void);
 void w25q128EraseSector(uint32_t addr);
 void w25q128WritePage(uint8_t* buf,uint32_t addr ,uint16_t len); 
 void w25q128ReadData(uint8_t *buf,uint32_t addr,uint16_t len); 
-uint8_t w25q128TestConnection(void);       
+uint8_t w25q128TestConnection(void);    
 void spiFlashWakeup(void); 
 void w25q128WriteBuffer(uint8_t *buf,uint32_t addr,uint16_t len);  
 uint32_t w25q128GetDevciceId(void);                                  
